@@ -12,7 +12,6 @@ public class CharacterAnimeTrigger: MonoBehaviour {
     }
 
     void AnimeFinish() {
-        Debug.Log("anime finish" );
         cha.sm.currState.AnimeFinish();
     }
 

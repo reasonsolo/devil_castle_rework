@@ -16,19 +16,24 @@ public class PlayerSkillState : SkillState
         }
     }
 }
-public class Dash: Skill {
 
-    private float dashSpeed = 15f;
-    public Dash() : base("Dash", "Fire3", 0.3f, 1f)
+public class PlayerDash : Dash
+{
+    public Player player;
+    public PlayerDash(Player player)
     {
+        this.player = player;
+        this.isBusy = false; 
     }
-    public override void Start() {
-        base.Start();
-        cha.rb.velocity = new Vector2(dashSpeed * cha.facingDir, 0);
-    }
+
+
     public override void Update()
     {
         base.Update();
-        cha.rb.velocity = new Vector2(dashSpeed * cha.facingDir, 0);
+        if (Input.GetButtonDown(player.attack.keyName))
+        {
+            player.attack.SetCombo(PrimaryAttack.maxCombo-1);
+            player.sm.ChangeState(new PlayerSkillState(player.attack, player));
+        }
     }
 }

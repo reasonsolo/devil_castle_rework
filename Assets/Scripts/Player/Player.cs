@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 
 
@@ -12,16 +10,23 @@ public class Player : Character
     public PlayerMove move;
     public PlayerJump jump;
     public PlayerFall fall;
+    public PlayerWallSlide wallSlide;
     #endregion
 
     public SkillManager skillManager;
 
+    public PlayerDash dash;
+    public PrimaryAttack attack;
+
     protected override void Start()
     {
         base.Start();
+        dash = new PlayerDash(this);
+        attack = new PrimaryAttack();
+
         List<Skill> skills = new List<Skill> {
-            new Dash(),
-            new PrimaryAttack()
+            dash,
+            attack
          };
         skillManager = new SkillManager(this, skills);
 
@@ -30,6 +35,7 @@ public class Player : Character
         move = new PlayerMove("Move", this);
         fall = new PlayerFall("Fall", this);
         jump = new PlayerJump("Jump", this);
+        wallSlide = new PlayerWallSlide("WallSlide", this);
         sm.Initialize(idle);
     }
 
@@ -59,10 +65,13 @@ public abstract class PlayerState : CharacterState
         xInput = Input.GetAxisRaw("Horizontal");
         yInput = Input.GetAxisRaw("Vertical");
         base.Update();
-        Skill skill = player.skillManager.GetActivateSkill();
-        if (skill != null) {
-            sm.ChangeState(new PlayerSkillState(skill, player));
-            return;
+        if (!player.isBusy)
+        {
+            Skill skill = player.skillManager.GetActivateSkill();
+            if (skill != null) {
+                sm.ChangeState(new PlayerSkillState(skill, player));
+                return;
+            }
         }
     }
 

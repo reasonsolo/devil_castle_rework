@@ -16,18 +16,20 @@ public class Skill
 
     public string keyName { get; protected set; }
     public Character cha { get; protected set; }
+    public bool isBusy { get; protected set; }
 
     public float duration { get; protected set; }
 
     public bool IsAnimeFinished { get; protected set; }
 
-    public Skill(string name, string key, float duration = 0, float cd = 0)
+    public Skill(string name, string key, float duration = 0, float cd = 0, bool isBusy = true)
     {
         this.skillName = name;
         this.cd = cd;
         this.duration = duration;
         this.keyName = key;
         this.IsAnimeFinished = false;
+        this.isBusy = isBusy;
     }
 
     public void SetUser(Character cha) {
@@ -74,11 +76,16 @@ public class Skill
             return IsAnimeFinished;
         }
     }
-    public virtual void Finish() { }
+    public virtual void Finish() {
+        if (isBusy)
+        {
+            cha.isBusy = false;
+        }
+    }
 
     public virtual void AnimeFinish() {
         IsAnimeFinished = true;
-     }
+    }
 
     public bool IsReady => cdTimer <= 0;
 }
@@ -107,6 +114,11 @@ public class SkillManager
     public bool IsSkillReady(string name)
     {
         return skillMap[name].IsReady;
+    }
+
+    public Skill GetSkill(string name)
+    {
+        return skillMap[name];
     }
 
     public Skill GetActivateSkill()
@@ -149,6 +161,7 @@ public class SkillState : CharacterState
     {
         this.skill = skill;
         skill.SetUser(cha);
+        this.isBusy = skill.isBusy;
     }
 
     public override void Enter()
@@ -175,3 +188,20 @@ public class SkillState : CharacterState
     }
 
 }
+public class Dash: Skill {
+
+    private float dashSpeedFactor = 3f;
+    public Dash() : base("Dash", "Fire3", 0.3f, 1f)
+    {
+    }
+    public override void Start() {
+        base.Start();
+        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.moveSpeed * cha.facingDir, 0);
+    }
+    public override void Update()
+    {
+        base.Update();
+        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.moveSpeed * cha.facingDir, 0);
+    }
+}
+

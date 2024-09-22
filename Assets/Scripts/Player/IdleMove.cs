@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 
 public class PlayerIdle : PlayerState
@@ -23,12 +22,20 @@ public class PlayerIdle : PlayerState
         if (Input.GetButtonDown("Jump") && player.IsGroundDetected) {
             sm.ChangeState(player.jump);
             return;
-        } 
-        if (!player.IsGroundDetected) {
-            sm.ChangeState(player.fall);
+        }
+        if (!player.IsGroundDetected)
+        {
+            if (player.IsWallDetected)
+            {
+                sm.ChangeState(player.wallSlide);
+            }
+            else if (player.rb.velocity.y < 0) 
+            {
+                sm.ChangeState(player.fall);
+            }
             return;
         }
-        if (xInput != 0)
+        if (xInput != 0 && !cha.isBusy)
         {
             sm.ChangeState(player.move);
         }
@@ -66,7 +73,6 @@ public class PlayerMove : PlayerState
         player.Move(player.facingDir * player.moveSpeed, rb.velocity.y);
 
         if (Input.GetButtonDown("Jump")) {
-            Debug.Log(player.jump);
             sm.ChangeState(player.jump);
             return;
         } 

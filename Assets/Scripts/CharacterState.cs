@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using TreeEditor;
 using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -13,6 +12,8 @@ public class CharacterState {
 
     protected float stateTimer;
     protected bool animeFinished;
+    protected bool isBusy;
+
 
     public CharacterState(string stateName, Character cha) {
         this.stateName = stateName;
@@ -24,6 +25,7 @@ public class CharacterState {
         stateTimer = 0;
         animeFinished = false;
         cha.anim.SetBool(stateName, true);
+        cha.isBusy = isBusy; 
     }
     public virtual void Update() {
         stateTimer += Time.deltaTime;
@@ -31,6 +33,7 @@ public class CharacterState {
     public virtual void Exit()
     {
         cha.anim.SetBool(stateName, false);
+        cha.isBusy = isBusy ? false : cha.isBusy;  
     }
 
     public virtual void AnimeFinish() {
