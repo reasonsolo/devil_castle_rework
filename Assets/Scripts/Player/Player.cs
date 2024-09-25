@@ -2,6 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+class PlayerAttribute : CharacterAttribute
+{
+    public PlayerAttribute(int level, int hp, int mp, int ap, int attack, int defense, int movespeed) : 
+        base(level, hp, mp, ap, attack, defense, movespeed)
+    {
+    }
+    public PlayerAttribute() : base(1, 100, 100, 100, 10, 5, 5)
+    {
+        this.jumpForce = 12;
+    }
+}
+
 public class Player : Character
 {
 
@@ -11,12 +23,29 @@ public class Player : Character
     public PlayerJump jump;
     public PlayerFall fall;
     public PlayerWallSlide wallSlide;
+    public PlayerHit hit;
+    public PlayerDie die;
     #endregion
 
     public SkillManager skillManager;
 
     public PlayerDash dash;
     public PrimaryAttack attack;
+
+    public Player()
+    {
+        charType = CharacterType.Player;
+        attr = new PlayerAttribute();
+    }
+
+    public override void HitBy(Skill skill)
+    {
+        base.HitBy(skill);
+        if (skill.skillType == SkillType.Attack)
+        {
+            sm.ChangeState(hit);
+        }
+    }
 
     protected override void Start()
     {
@@ -35,15 +64,20 @@ public class Player : Character
         move = new PlayerMove("Move", this);
         fall = new PlayerFall("Fall", this);
         jump = new PlayerJump("Jump", this);
+        hit = new PlayerHit("Hit", this);
+        die = new PlayerDie("die", this);
         wallSlide = new PlayerWallSlide("WallSlide", this);
         sm.Initialize(idle);
     }
 
     protected override void Update()
     {
-        base.Update();
+        if (!sm.currState.isBusy)
+        {
+            base.Update();
+        }
     }
-
+    
 }
 public abstract class PlayerState : CharacterState
 {

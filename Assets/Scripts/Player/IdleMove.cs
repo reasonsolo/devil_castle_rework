@@ -70,7 +70,7 @@ public class PlayerMove : PlayerState
         {
             player.Flip();
         }
-        player.Move(player.facingDir * player.moveSpeed, rb.velocity.y);
+        player.Move(player.facingDir * player.attr.moveSpeed, rb.velocity.y);
 
         if (Input.GetButtonDown("Jump")) {
             sm.ChangeState(player.jump);

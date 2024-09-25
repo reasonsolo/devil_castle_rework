@@ -7,7 +7,7 @@ public class PlayerJump: PlayerState
     }
     public override void Enter() { 
         base.Enter();
-        player.Move(rb.velocity.x, player.jumpForce);
+        player.Move(rb.velocity.x, player.attr.jumpForce);
     }
     public override void Update()
     {

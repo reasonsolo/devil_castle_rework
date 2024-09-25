@@ -1,35 +1,44 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
+
+
+public enum SkillType
+{
+    Attack,
+    Buff,
+    Debuff,
+    Heal,
+    Movement,
+    Summon,
+}
+
 
 public class Skill
 {
+    public SkillType skillType { get; protected set; }
     public string skillName { get; protected set; }
     public string description { get; protected set; }
     public float cd { get; protected set; }
     public float cdTimer { get; protected set; }
 
+    public float duration { get; protected set; }
     public float timer {get; protected set; }
-
     public string keyName { get; protected set; }
     public Character cha { get; protected set; }
-    public bool isBusy { get; protected set; }
+    public bool isBlocking { get; protected set; }
+    public bool isAnimeFinished { get; protected set; }
 
-    public float duration { get; protected set; }
-
-    public bool IsAnimeFinished { get; protected set; }
-
-    public Skill(string name, string key, float duration = 0, float cd = 0, bool isBusy = true)
+    public Skill(SkillType type, string name, string key, float duration = 0, float cd = 0, bool isBlocking = true)
     {
+        this.skillType = type;
         this.skillName = name;
         this.cd = cd;
         this.duration = duration;
         this.keyName = key;
-        this.IsAnimeFinished = false;
-        this.isBusy = isBusy;
+        this.isAnimeFinished = false;
+        this.isBlocking = isBlocking;
     }
 
     public void SetUser(Character cha) {
@@ -55,7 +64,7 @@ public class Skill
     public virtual void Start() {
         timer = 0;
         cdTimer = cd;
-        IsAnimeFinished = false;
+        isAnimeFinished = false;
         if (cd > 0) {
             IEnumerator cdCoro = CoolDown(0);
             cha.StartCoroutine(cdCoro);
@@ -73,18 +82,21 @@ public class Skill
         }
         else
         {
-            return IsAnimeFinished;
+            return isAnimeFinished;
         }
     }
-    public virtual void Finish() {
-        if (isBusy)
+    public virtual void Finish() { }
+
+    public virtual void AnimeFinish()
+    {
+        isAnimeFinished = true;
+        if (isBlocking)
         {
             cha.isBusy = false;
         }
     }
-
-    public virtual void AnimeFinish() {
-        IsAnimeFinished = true;
+    public virtual void AnimeHit()
+    {
     }
 
     public bool IsReady => cdTimer <= 0;
@@ -161,7 +173,7 @@ public class SkillState : CharacterState
     {
         this.skill = skill;
         skill.SetUser(cha);
-        this.isBusy = skill.isBusy;
+        this.isBusy = skill.isBlocking;
     }
 
     public override void Enter()
@@ -173,6 +185,11 @@ public class SkillState : CharacterState
     {
         base.Update();
         skill.Update();
+        Debug.Log("skill " + skill.skillName + " finish " + skill.IsFinished());
+        if (skill.IsFinished())
+        {
+            cha.sm.ChangeDefault();    
+        }
     }
 
     public override void Exit()
@@ -185,23 +202,27 @@ public class SkillState : CharacterState
     {
         base.AnimeFinish();
         skill.AnimeFinish();
+        if (skill.IsFinished())
+        {
+            cha.sm.ChangeDefault();    
+        }
     }
 
 }
 public class Dash: Skill {
 
     private float dashSpeedFactor = 3f;
-    public Dash() : base("Dash", "Fire3", 0.3f, 1f)
+    public Dash() : base(SkillType.Movement, "Dash", "Fire3", 0.3f, 1f)
     {
     }
     public override void Start() {
         base.Start();
-        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.moveSpeed * cha.facingDir, 0);
+        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.attr.moveSpeed * cha.facingDir, 0);
     }
     public override void Update()
     {
         base.Update();
-        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.moveSpeed * cha.facingDir, 0);
+        cha.rb.velocity = new Vector2(dashSpeedFactor * cha.attr.moveSpeed * cha.facingDir, 0);
     }
 }
 

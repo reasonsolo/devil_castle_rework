@@ -12,9 +12,8 @@ public class CharacterState {
 
     protected float stateTimer;
     protected bool animeFinished;
-    protected bool isBusy;
-
-
+    public int priority = 0;
+    public bool isBusy {get; protected set;}
     public CharacterState(string stateName, Character cha) {
         this.stateName = stateName;
         this.cha = cha;
@@ -36,7 +35,11 @@ public class CharacterState {
         cha.isBusy = isBusy ? false : cha.isBusy;  
     }
 
-    public virtual void AnimeFinish() {
+    public virtual void AnimeFinish()
+    {
         animeFinished = true;
-     }
+    }
+    public virtual void AnimeHit()
+    {
+    }
 }

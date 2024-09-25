@@ -1,92 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
-public class EnemyState : CharacterState
-{
-    public Enemy enemy;
-    public EnemyState(string stateName, Enemy enemy) : base(stateName, enemy)
-    {
-        this.enemy = enemy;
-    }
-};
-
-public class EnemyIdle : EnemyState
-{
-    public EnemyIdle(Enemy enemy) : base(enemy.type + "Idle", enemy)
-    {
-    }
-
-    public override void Enter()
-    {
-        base.Enter();
-        enemy.Move(0, 0);
-    }
-
-    public override void Update()
-    {
-        base.Update();
-        enemy.Move(0, 0);
-        if (enemy.IsPlayerTargeted)
-        {
-            enemy.sm.ChangeState(enemy.move);
-        }
-    }
-}
-public class EnemyMove: EnemyState
-{
-    public EnemyMove(Enemy enemy) : base(enemy.type + "Move", enemy)
-    {
-    }
-
-    public override void Update()
-    {
-        base.Update();
-        Gizmos.color = Color.red;
-        Debug.Log("enemy " + enemy.IsPlayerTargeted + " " + enemy.IsStageDetected + " " + enemy.IsPlayerDetected);
-        if (enemy.IsPlayerDetected)
-        {
-            enemy.sm.ChangeState(enemy.attack);
-            return;
-        }
-        if (enemy.IsPlayerTargeted && !enemy.IsStageDetected)
-        {
-            enemy.ChasePlayer();
-        }
-        else
-        {
-            enemy.sm.ChangeState(enemy.idle);
-        }
-
-    }
-}
-public class EnemyAttack: EnemyState
-{
-    public EnemyAttack(Enemy enemy) : base(enemy.type + "Attack", enemy)
-    {
-    }
-
-    public override void AnimeFinish()
-    {
-        base.AnimeFinish();
-        enemy.isBusy = false;
-        enemy.sm.ChangeState(enemy.idle);
-    }
-
-    public override void Enter()
-    {
-        enemy.isBusy = true;
-        base.Enter();
-        enemy.Move(0, 0);
-    }
-
-    public override void Update()
-    {
-        base.Update();
-        enemy.Move(0, 0);
-    }
-}
-
 public class Enemy : Character
 {
     public string type {  get; protected set; }
@@ -94,12 +8,12 @@ public class Enemy : Character
     public List<Skill> skills { get; protected set; }
     public EnemyIdle idle { get; protected set; }
     public EnemyMove move { get; protected set; }
-    public EnemyAttack attack { get; protected set; }
+    public EnemyBattle attack { get; protected set; }
+    public EnemyHit hit { get; protected set; }
+    public EnemyDie die { get; protected set; }
     
     public float xTargetDistance { get; protected set; }
     public float yTargetDistance { get; protected set; }
-
-
 
     protected Player player;
     [SerializeField] protected Transform playerCheck;
@@ -116,6 +30,7 @@ public class Enemy : Character
 
     public Enemy(string type)
     {
+        this.charType = CharacterType.Enemy;
         this.type = type;
         this.skills = new List<Skill>();
         xTargetDistance = 7;
@@ -128,7 +43,9 @@ public class Enemy : Character
         sm = new CharacterStateMachine(this);
         idle = new EnemyIdle(this);
         move = new EnemyMove(this);
-        attack = new EnemyAttack(this);
+        attack = new EnemyBattle(this);
+        hit = new EnemyHit(this);
+        die = new EnemyDie(this);
         playerCheck = transform;
         player = GameObject.Find("Player").GetComponent<Player>();
         skillManager = new SkillManager(this, skills);
@@ -137,6 +54,10 @@ public class Enemy : Character
 
     protected override void Update()
     {
+        if (attr.hp <= 0)
+        {
+            sm.ChangeState(die);
+        }
         base.Update();
     }
     public override void OnDrawGizmos() {
@@ -160,6 +81,41 @@ public class Enemy : Character
     public virtual void ChasePlayer()
     {
         TurnToPlayer();
-        Move(moveSpeed * facingDir, rb.velocity.y);
+        Move(attr.moveSpeed * facingDir, rb.velocity.y);
+    }
+
+    public override void HitBy(Skill skill)
+    {
+        base.HitBy(skill);
+        if (skill.skillType == SkillType.Attack)
+        {
+            sm.ChangeState(hit);
+        }
+    }
+}
+public class EnemyAttack : AreaSkill
+{
+    protected SkillConfig config =
+        new SkillConfig(1f, 1.6f, 0f, 0.5f);
+    public EnemyAttack(string name, string key, float duration = 0, float cd = 0, bool isBusy = true)
+        : base(SkillType.Attack, name, key, duration, cd, isBusy)
+    {
+    }
+
+    public override RaycastHit2D[] GetHitsObjcts()
+    {
+        Vector2 attackCenter = new Vector2(cha.transform.position.x + cha.facingDir * config.dir * config.rangeXOffset + config.radius / 2,
+            cha.transform.position.y + config.rangeYOffset);
+        return Physics2D.CircleCastAll(attackCenter, config.range / 2, Vector2.right * config.dir * cha.facingDir, config.range);
+    }
+
+    public override void HitObject(GameObject obj)
+    {
+        var target = obj.GetComponent<Character>();
+        if (target != null)
+        {
+            target.HitBy(this);
+            target.ReduceHpMpAp((int)(config.damageFactor * (float)cha.attr.attack), 0, 0);
+        }
     }
 }

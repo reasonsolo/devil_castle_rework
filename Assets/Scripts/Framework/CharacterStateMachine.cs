@@ -8,6 +8,7 @@ public class CharacterStateMachine
     private int maxHistoricalQueue = 10;
     public Character cha { get; protected set; }
     public CharacterState currState;
+    public CharacterState defaultState;
     public Queue<CharacterState> historicalStates { get; private set; }
 
     public CharacterStateMachine(Character cha) {
@@ -16,19 +17,25 @@ public class CharacterStateMachine
     }
     public void Initialize(CharacterState state)
     {   
+        defaultState = state;
         currState = state;
         currState.Enter();
     }
     public void ChangeState(CharacterState newState)
     {
-        if (historicalStates.Count == maxHistoricalQueue)
+        if (cha.isBusy && currState.priority >= newState.priority)
         {
-            historicalStates.Dequeue();
+            Debug.Log("char is busy " + currState.stateName + " can't be interuptted by " + newState.stateName);
+            return;
         }
         currState.Exit();
-        historicalStates.Enqueue(currState);
         currState = newState;
         currState.Enter();
+    }
+    public virtual void ChangeDefault()
+    {
+        Debug.Log("change to default " + defaultState);
+        ChangeState(defaultState);
     }
 
     public void Update() {

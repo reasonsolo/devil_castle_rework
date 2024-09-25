@@ -23,7 +23,7 @@ public class PlayerDash : Dash
     public PlayerDash(Player player)
     {
         this.player = player;
-        this.isBusy = false; 
+        this.isBlocking = false; 
     }
 
 

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CharacterAnimeTrigger: MonoBehaviour {
 
-    public Character cha;
+    protected Character cha;
     public CharacterAnimeTrigger() {
     }
 
@@ -12,7 +12,13 @@ public class CharacterAnimeTrigger: MonoBehaviour {
     }
 
     void AnimeFinish() {
+        Debug.Log("anime finised " + cha.sm.currState);
         cha.sm.currState.AnimeFinish();
+    }
+
+    void AnimeHit()
+    {
+        
     }
 
 }

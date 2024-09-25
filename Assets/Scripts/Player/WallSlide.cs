@@ -18,9 +18,10 @@ public class PlayerWallSlide : PlayerState
     public override void Update()
     {
         base.Update();
+        Debug.Log(player.IsWallDetected + " " + player.IsGroundDetected);
         if (!player.IsWallDetected || player.IsGroundDetected)
         {
-            sm.ChangeState(player.idle);
+            sm.ChangeDefault();
             return;
         }
         if (yInput < 0)
@@ -31,7 +32,8 @@ public class PlayerWallSlide : PlayerState
         if (Input.GetButtonDown("Jump"))
         {
             player.Flip();
-            player.Move(wallJumpFactor * player.jumpForce * player.facingDir, wallJumpFactor * player.jumpForce);
+            player.Move(wallJumpFactor * player.attr.jumpForce * player.facingDir,
+                wallJumpFactor * player.attr.jumpForce);
             sm.ChangeState(player.jump);
             return;
         }
