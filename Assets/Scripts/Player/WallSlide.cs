@@ -18,7 +18,6 @@ public class PlayerWallSlide : PlayerState
     public override void Update()
     {
         base.Update();
-        Debug.Log(player.IsWallDetected + " " + player.IsGroundDetected);
         if (!player.IsWallDetected || player.IsGroundDetected)
         {
             sm.ChangeDefault();

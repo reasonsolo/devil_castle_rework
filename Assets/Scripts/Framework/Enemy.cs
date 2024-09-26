@@ -104,9 +104,7 @@ public class EnemyAttack : AreaSkill
 
     public override RaycastHit2D[] GetHitsObjcts()
     {
-        Vector2 attackCenter = new Vector2(cha.transform.position.x + cha.facingDir * config.dir * config.rangeXOffset + config.radius / 2,
-            cha.transform.position.y + config.rangeYOffset);
-        return Physics2D.CircleCastAll(attackCenter, config.range / 2, Vector2.right * config.dir * cha.facingDir, config.range);
+        return config.area.GetHitsObjcts(cha.transform.position, cha.facingDir);
     }
 
     public override void HitObject(GameObject obj)

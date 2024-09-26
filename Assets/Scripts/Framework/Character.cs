@@ -111,6 +111,10 @@ public class Character : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(stageCheck.position + new Vector3(facingDir * facingCheckDistance, 0),
        stageCheck.position + new Vector3(facingDir * facingCheckDistance, -groundCheckDistance));
+        if (sm != null && sm.currState != null)
+        {
+            sm.currState.DrawGizmos();
+        }
     }
 
     public virtual void AnimeFinished() {

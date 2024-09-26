@@ -63,10 +63,8 @@ public class PrimaryAttack : AreaSkill
 
     public override RaycastHit2D[] GetHitsObjcts()
     {
-        var area = configs[comboCounter];
-        Vector2 attackCenter = new Vector2(cha.transform.position.x + cha.facingDir * area.dir * area.rangeXOffset + area.radius / 2,
-            cha.transform.position.y + area.rangeYOffset);
-        return Physics2D.CircleCastAll(attackCenter, area.range / 2, Vector2.right * area.dir * cha.facingDir, area.range);
+        var area = configs[comboCounter].area;
+        return area.GetHitsObjcts(cha.transform.position, cha.facingDir);
     }
 
     public override void HitObject(GameObject obj)
@@ -74,9 +72,22 @@ public class PrimaryAttack : AreaSkill
         var target = obj.GetComponent<Character>();
         if (target != null)
         {
+            Debug.Log("target " + target + " hit by " + this);
             target.HitBy(this);
             var config = configs[comboCounter];
             target.ReduceHpMpAp((int)(config.damageFactor * (float)cha.attr.attack), 0, 0);
+        }
+    }
+    public override void DrawGizmos()
+    {
+        if (timer > 0 && !IsFinished())
+        {
+            var area = configs[comboCounter].area;
+            Gizmos.color = Color.green;
+            var center = area.Center(cha.transform.position, cha.facingDir);
+            Gizmos.DrawWireSphere(center, area.radius);
+            Gizmos.DrawWireSphere(center + Vector2.right * area.dir * cha.facingDir * area.range, area.radius);
+
         }
     }
 }

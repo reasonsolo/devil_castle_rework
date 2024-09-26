@@ -12,13 +12,12 @@ public class CharacterAnimeTrigger: MonoBehaviour {
     }
 
     void AnimeFinish() {
-        Debug.Log("anime finised " + cha.sm.currState);
         cha.sm.currState.AnimeFinish();
     }
 
     void AnimeHit()
     {
-        
+        cha.sm.currState.AnimeHit();
     }
 
 }

@@ -42,4 +42,5 @@ public class CharacterState {
     public virtual void AnimeHit()
     {
     }
+    public virtual void DrawGizmos() { }
 }

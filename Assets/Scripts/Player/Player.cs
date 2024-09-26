@@ -65,19 +65,16 @@ public class Player : Character
         fall = new PlayerFall("Fall", this);
         jump = new PlayerJump("Jump", this);
         hit = new PlayerHit("Hit", this);
-        die = new PlayerDie("die", this);
+        die = new PlayerDie("Die", this);
         wallSlide = new PlayerWallSlide("WallSlide", this);
         sm.Initialize(idle);
     }
 
     protected override void Update()
     {
-        if (!sm.currState.isBusy)
-        {
-            base.Update();
-        }
+        base.Update();
     }
-    
+
 }
 public abstract class PlayerState : CharacterState
 {
@@ -96,13 +93,14 @@ public abstract class PlayerState : CharacterState
     }
     public override void Update()
     {
+        base.Update();
         xInput = Input.GetAxisRaw("Horizontal");
         yInput = Input.GetAxisRaw("Vertical");
-        base.Update();
         if (!player.isBusy)
         {
             Skill skill = player.skillManager.GetActivateSkill();
             if (skill != null) {
+                Debug.Log("get skill " +  skill.skillName);
                 sm.ChangeState(new PlayerSkillState(skill, player));
                 return;
             }

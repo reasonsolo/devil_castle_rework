@@ -100,6 +100,9 @@ public class Skill
     }
 
     public bool IsReady => cdTimer <= 0;
+
+    public virtual void DrawGizmos() {
+    }
 }
 
 public class SkillManager
@@ -185,7 +188,7 @@ public class SkillState : CharacterState
     {
         base.Update();
         skill.Update();
-        Debug.Log("skill " + skill.skillName + " finish " + skill.IsFinished());
+        //Debug.Log("skill " + skill.skillName + " finish " + skill.IsFinished());
         if (skill.IsFinished())
         {
             cha.sm.ChangeDefault();    
@@ -207,7 +210,16 @@ public class SkillState : CharacterState
             cha.sm.ChangeDefault();    
         }
     }
+    public override void AnimeHit()
+    {
+        skill.AnimeHit();
+    }
 
+    public override void DrawGizmos()
+    {
+        base.DrawGizmos();
+        skill.DrawGizmos();
+    }
 }
 public class Dash: Skill {
 

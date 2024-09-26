@@ -94,6 +94,7 @@ public class EnemyHit : EnemyState
     {
         base.AnimeFinish();
         isBusy = false;
+        sm.ChangeDefault();
     }
 
     public override void Enter()
@@ -111,6 +112,7 @@ public class EnemyDie: EnemyState
 {
     public EnemyDie(Enemy enemy) : base(enemy.type + "Die", enemy)
     {
+        this.priority = 1000;
     }
 
     public override void AnimeFinish()
@@ -122,6 +124,7 @@ public class EnemyDie: EnemyState
     public override void Enter()
     {
         base.Enter();
+        cha.Move(0, 0);
         isBusy = true;
     }
 
